@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tera Diet — Content Generator</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">
+      <span class="brand-icon">🐾</span>
+      <span class="brand-name">Tera Diet</span>
+    </div>
+    <nav class="nav">
+      <button class="nav-btn active" data-tab="ideas">
+        <span class="nav-icon">💡</span> Content Ideas
+      </button>
+      <button class="nav-btn" data-tab="caption">
+        <span class="nav-icon">✍️</span> Captions
+      </button>
+      <button class="nav-btn" data-tab="hook">
+        <span class="nav-icon">🎣</span> Hooks
+      </button>
+      <button class="nav-btn" data-tab="script">
+        <span class="nav-icon">🎬</span> Video Script
+      </button>
+      <button class="nav-btn" data-tab="angles">
+        <span class="nav-icon">📐</span> Shooting Angles
+      </button>
+    </nav>
+    <div class="sidebar-footer">Content powered by AI</div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+
+    <!-- Header -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <h1 class="page-title" id="page-title">Content Ideas</h1>
+        <p class="page-subtitle" id="page-subtitle">Malaysia's #1 insect-based pet food — content generator</p>
+      </div>
+      <div class="topbar-right">
+        <div class="tag">Tera Diet Studio</div>
+      </div>
+    </header>
+
+    <!-- Global Controls -->
+    <div class="controls-bar">
+      <div class="input-group">
+        <label>Topic / Theme</label>
+        <input type="text" id="topic-input" placeholder="e.g. insect protein, pet allergies, sustainability…" />
+      </div>
+      <div class="input-group">
+        <label>Platform</label>
+        <select id="platform-select">
+          <option value="instagram">Instagram</option>
+          <option value="tiktok">TikTok</option>
+          <option value="youtube">YouTube Shorts</option>
+          <option value="facebook">Facebook Reels</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label>Tone</label>
+        <select id="tone-select">
+          <option value="motivational">Motivational</option>
+          <option value="educational">Educational</option>
+          <option value="humorous">Humorous</option>
+          <option value="relatable">Relatable</option>
+        </select>
+      </div>
+      <button class="generate-btn" id="generate-btn">
+        <span class="btn-icon">⚡</span> Generate
+      </button>
+    </div>
+
+    <!-- Tabs Content -->
+    <div class="tab-content" id="tab-ideas">
+      <div class="output-grid" id="ideas-output">
+        <div class="placeholder-card">
+          <div class="placeholder-icon">💡</div>
+          <p>Enter a topic and hit Generate to get content ideas</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-content hidden" id="tab-caption">
+      <div class="output-list" id="caption-output">
+        <div class="placeholder-card">
+          <div class="placeholder-icon">✍️</div>
+          <p>Enter a topic and hit Generate to create captions</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-content hidden" id="tab-hook">
+      <div class="output-list" id="hook-output">
+        <div class="placeholder-card">
+          <div class="placeholder-icon">🎣</div>
+          <p>Enter a topic and hit Generate to craft attention-grabbing hooks</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-content hidden" id="tab-script">
+      <div class="script-wrapper" id="script-output">
+        <div class="placeholder-card">
+          <div class="placeholder-icon">🎬</div>
+          <p>Enter a topic and hit Generate to write a full video script</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-content hidden" id="tab-angles">
+      <div class="angles-grid" id="angles-output">
+        <div class="placeholder-card">
+          <div class="placeholder-icon">📐</div>
+          <p>Enter a topic and hit Generate to get shooting angle suggestions</p>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
