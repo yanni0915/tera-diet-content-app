@@ -7,6 +7,7 @@ const TAB_META = {
   hook:    { title: 'Hooks',            subtitle: 'Attention-grabbing opening lines to stop the scroll' },
   script:  { title: 'Video Script',     subtitle: 'Full word-for-word video script ready to shoot' },
   angles:  { title: 'Shooting Angles',  subtitle: 'Cinematography tips to make your pet food content stand out' },
+  saved:   { title: 'Saved Library',    subtitle: 'All your bookmarked content — stored in the database' },
 };
 
 // ── Content Databases ──────────────────────────────────
@@ -219,6 +220,10 @@ function getAngles(topic) {
 }
 
 // ── Helpers ────────────────────────────────────────────
+const API = 'http://localhost:3000/api';
+
+let currentTopic = '', currentPlatform = 'instagram', currentTone = 'motivational';
+
 function capitalize(s) {
   if (!s) return '';
   return s.charAt(0).toUpperCase() + s.slice(1);
@@ -235,6 +240,92 @@ function copyToClipboard(text, btn) {
     showToast('Copied to clipboard');
     setTimeout(() => btn.textContent = 'Copy', 1500);
   });
+}
+
+// ── DB: Save content ───────────────────────────────────
+async function saveContent(type, title, content) {
+  try {
+    const res = await fetch(`${API}/save`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type, title, content, topic: currentTopic, platform: currentPlatform, tone: currentTone }),
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast('Saved to library!');
+      loadSaved();
+    }
+  } catch {
+    showToast('Server offline — save unavailable');
+  }
+}
+
+// ── DB: Delete saved item ──────────────────────────────
+async function deleteSaved(id, card) {
+  try {
+    await fetch(`${API}/saved/${id}`, { method: 'DELETE' });
+    card.remove();
+    loadSaved();
+    showToast('Removed from saved');
+  } catch {
+    showToast('Server offline');
+  }
+}
+
+// ── DB: Load saved content ─────────────────────────────
+async function loadSaved() {
+  const list = document.getElementById('saved-output');
+  try {
+    const res = await fetch(`${API}/saved`);
+    const items = await res.json();
+    document.getElementById('saved-count').textContent = `${items.length} item${items.length !== 1 ? 's' : ''}`;
+    if (!items.length) {
+      list.innerHTML = `<div class="placeholder-card"><div class="placeholder-icon">🔖</div><p>No saved content yet. Bookmark cards from any tab.</p></div>`;
+      return;
+    }
+    list.innerHTML = '';
+    items.forEach(item => {
+      const card = document.createElement('div');
+      card.className = 'saved-card';
+      const date = new Date(item.created_at).toLocaleDateString('en-MY', { day: 'numeric', month: 'short', year: 'numeric' });
+      card.innerHTML = `
+        <button class="delete-btn" title="Remove">✕</button>
+        <span class="saved-type-badge">${item.type}</span>
+        <div class="saved-title">${item.title}</div>
+        <div class="saved-text">${item.content}</div>
+        <div class="saved-meta">📅 ${date} &nbsp;·&nbsp; 🎯 ${item.topic || '—'} &nbsp;·&nbsp; 📱 ${item.platform || '—'}</div>
+      `;
+      card.querySelector('.delete-btn').addEventListener('click', () => deleteSaved(item.id, card));
+      list.appendChild(card);
+    });
+  } catch {
+    list.innerHTML = `<div class="placeholder-card"><div class="placeholder-icon">⚠️</div><p>Could not load saved items. Make sure the server is running.</p></div>`;
+  }
+}
+
+// ── DB: Log generation ─────────────────────────────────
+async function logGeneration(topic, platform, tone) {
+  try {
+    await fetch(`${API}/history`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ topic, platform, tone }),
+    });
+  } catch { /* silent */ }
+}
+
+// ── Save Button helper ─────────────────────────────────
+function makeSaveBtn(type, title, content) {
+  const btn = document.createElement('button');
+  btn.className = 'save-btn';
+  btn.textContent = '🔖';
+  btn.title = 'Save to library';
+  btn.addEventListener('click', () => {
+    btn.classList.add('saved');
+    btn.textContent = '✓';
+    saveContent(type, title, content);
+  });
+  return btn;
 }
 
 // ── Render Functions ───────────────────────────────────
@@ -255,6 +346,7 @@ function renderIdeas(ideas) {
     card.querySelector('.copy-btn').addEventListener('click', (e) => {
       copyToClipboard(`${idea.title}\n\n${idea.body}`, e.target);
     });
+    card.appendChild(makeSaveBtn('idea', idea.title, `${idea.title}\n\n${idea.body}`));
     grid.appendChild(card);
   });
 }
@@ -274,6 +366,7 @@ function renderCaptions(captions) {
     card.querySelector('.copy-btn').addEventListener('click', (e) => {
       copyToClipboard(cap.text, e.target);
     });
+    card.appendChild(makeSaveBtn('caption', cap.label, cap.text));
     list.appendChild(card);
   });
 }
@@ -293,6 +386,7 @@ function renderHooks(hooks) {
     card.querySelector('.copy-btn').addEventListener('click', (e) => {
       copyToClipboard(hook.text, e.target);
     });
+    card.appendChild(makeSaveBtn('hook', hook.label, hook.text));
     list.appendChild(card);
   });
 }
@@ -323,16 +417,30 @@ function renderScript(script) {
     wrapper.appendChild(section);
   });
 
-  // Full script copy button
   const fullText = script.sections.map(s =>
     `[${s.tag} – ${s.time}]\n` + s.content.map(l => l.text).join('\n')
   ).join('\n\n');
+
+  const btnRow = document.createElement('div');
+  btnRow.style.cssText = 'display:flex;gap:10px;margin-top:4px;';
+
   const copyBtn = document.createElement('button');
   copyBtn.className = 'generate-btn';
-  copyBtn.style.marginTop = '4px';
   copyBtn.innerHTML = '<span class="btn-icon">📋</span> Copy Full Script';
   copyBtn.addEventListener('click', () => copyToClipboard(fullText, copyBtn));
-  wrapper.appendChild(copyBtn);
+
+  const saveBtn = document.createElement('button');
+  saveBtn.className = 'generate-btn';
+  saveBtn.style.background = 'var(--green-dark)';
+  saveBtn.innerHTML = '<span class="btn-icon">🔖</span> Save Script';
+  saveBtn.addEventListener('click', () => {
+    saveBtn.innerHTML = '<span class="btn-icon">✓</span> Saved';
+    saveContent('script', script.title, fullText);
+  });
+
+  btnRow.appendChild(copyBtn);
+  btnRow.appendChild(saveBtn);
+  wrapper.appendChild(btnRow);
 }
 
 function renderAngles(angles) {
@@ -347,6 +455,7 @@ function renderAngles(angles) {
       <div class="angle-desc">${angle.desc}</div>
       <span class="angle-badge">${angle.badge}</span>
     `;
+    card.appendChild(makeSaveBtn('angle', angle.name, `${angle.name}\n\n${angle.desc}\n${angle.badge}`));
     grid.appendChild(card);
   });
 }
@@ -363,29 +472,28 @@ function setLoading(containerId) {
 
 // ── Generate Handler ───────────────────────────────────
 function generate() {
-  const topic    = document.getElementById('topic-input').value.trim();
-  const platform = document.getElementById('platform-select').value;
-  const tone     = document.getElementById('tone-select').value;
-  const btn      = document.getElementById('generate-btn');
+  currentTopic    = document.getElementById('topic-input').value.trim();
+  currentPlatform = document.getElementById('platform-select').value;
+  currentTone     = document.getElementById('tone-select').value;
+  const btn       = document.getElementById('generate-btn');
 
   btn.classList.add('loading');
   btn.innerHTML = '<span class="btn-icon">⏳</span> Generating…';
 
-  // Show loaders
   ['ideas-output', 'caption-output', 'hook-output', 'script-output', 'angles-output']
     .forEach(id => setLoading(id));
 
-  // Simulate async generation
   setTimeout(() => {
-    renderIdeas(getIdeas(topic, platform, tone));
-    renderCaptions(getCaptions(topic, platform, tone));
-    renderHooks(getHooks(topic, platform, tone));
-    renderScript(getScript(topic, platform, tone));
-    renderAngles(getAngles(topic));
+    renderIdeas(getIdeas(currentTopic, currentPlatform, currentTone));
+    renderCaptions(getCaptions(currentTopic, currentPlatform, currentTone));
+    renderHooks(getHooks(currentTopic, currentPlatform, currentTone));
+    renderScript(getScript(currentTopic, currentPlatform, currentTone));
+    renderAngles(getAngles(currentTopic));
 
     btn.classList.remove('loading');
     btn.innerHTML = '<span class="btn-icon">⚡</span> Generate';
     showToast('Content generated!');
+    logGeneration(currentTopic, currentPlatform, currentTone);
   }, 900);
 }
 
@@ -402,6 +510,8 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
 
     document.getElementById('page-title').textContent    = TAB_META[tab].title;
     document.getElementById('page-subtitle').textContent = TAB_META[tab].subtitle;
+
+    if (tab === 'saved') loadSaved();
   });
 });
 
@@ -418,7 +528,7 @@ const toast = document.createElement('div');
 toast.className = 'toast';
 document.body.appendChild(toast);
 
-// ── Auto-generate on load with default content ─────────
+// ── Auto-generate on load ─────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
   document.getElementById('topic-input').value = 'insect protein for pets';
   generate();

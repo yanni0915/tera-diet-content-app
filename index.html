@@ -30,6 +30,9 @@
       <button class="nav-btn" data-tab="angles">
         <span class="nav-icon">📐</span> Shooting Angles
       </button>
+      <button class="nav-btn" data-tab="saved">
+        <span class="nav-icon">🔖</span> Saved
+      </button>
     </nav>
     <div class="sidebar-footer">Content powered by AI</div>
   </aside>
@@ -119,6 +122,18 @@
         <div class="placeholder-card">
           <div class="placeholder-icon">📐</div>
           <p>Enter a topic and hit Generate to get shooting angle suggestions</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-content hidden" id="tab-saved">
+      <div class="saved-header">
+        <span id="saved-count" class="saved-count-badge">0 items</span>
+      </div>
+      <div class="output-list" id="saved-output">
+        <div class="placeholder-card">
+          <div class="placeholder-icon">🔖</div>
+          <p>Save any generated content using the bookmark button on each card</p>
         </div>
       </div>
     </div>

@@ -411,6 +411,72 @@ body {
   border-radius: 20px;
 }
 
+/* ── Save Button ───────────────────────────────────── */
+.save-btn {
+  position: absolute;
+  top: 14px; right: 56px;
+  background: var(--green-pale);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 14px;
+  padding: 3px 8px;
+  cursor: pointer;
+  color: var(--green-dark);
+  transition: background 0.12s;
+  line-height: 1;
+}
+.save-btn:hover { background: var(--green-light); }
+.save-btn.saved { color: var(--accent); background: #fff8ec; border-color: var(--accent); }
+
+/* ── Saved Tab ─────────────────────────────────────── */
+.saved-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.saved-count-badge {
+  background: var(--green-light);
+  color: var(--green-dark);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+.saved-card {
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 22px;
+  box-shadow: var(--shadow);
+  position: relative;
+}
+.saved-card .saved-type-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding: 2px 9px;
+  border-radius: 20px;
+  background: var(--green-light);
+  color: var(--green-dark);
+  margin-bottom: 8px;
+}
+.saved-card .saved-title { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+.saved-card .saved-text { font-size: 13px; color: var(--muted); line-height: 1.6; white-space: pre-wrap; }
+.saved-card .saved-meta { font-size: 11px; color: var(--muted); margin-top: 8px; }
+.delete-btn {
+  position: absolute;
+  top: 14px; right: 14px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  color: var(--muted);
+  transition: color 0.12s;
+}
+.delete-btn:hover { color: #e74c3c; }
+
 /* ── Loading Spinner ───────────────────────────────── */
 .loading-wrap {
   display: flex;
